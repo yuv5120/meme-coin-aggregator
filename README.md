@@ -16,6 +16,12 @@ A real-time meme coin data aggregation service that fetches data from multiple D
 - 🎨 **Beautiful UI**: Bright blue theme with glassmorphism effects
 - 📊 **Filtering & Sorting**: Time periods (1h, 24h, 7d) and multiple sort options
 - 🔍 **Smart Merging**: Intelligent duplicate token detection and merging
+ 
+## 🔗 Live Demo
+ 
+- **Frontend (Vercel)**: [https://meme-coin-aggregator-psi.vercel.app](https://meme-coin-aggregator-psi.vercel.app)
+- **Backend (Render)**: [https://meme-coin-backend.onrender.com](https://meme-coin-backend.onrender.com)
+- **Health Check**: [https://meme-coin-backend.onrender.com/api/health](https://meme-coin-backend.onrender.com/api/health)
 
 ## 🏗️ Architecture
 
