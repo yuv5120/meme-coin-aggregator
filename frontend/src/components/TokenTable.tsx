@@ -147,16 +147,17 @@ export const TokenTable: React.FC<TokenTableProps> = ({ tokens, loading, period 
                                 {/* Sources */}
                                 <td>
                                     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                                        {isAggregated && (
+                                        {isAggregated ? (
                                             <span className="source-badge aggregate">
                                                 AGGREGATE
                                             </span>
+                                        ) : (
+                                            token.sources && token.sources.map((source) => (
+                                                <span key={source} className="source-badge">
+                                                    {source.toUpperCase()}
+                                                </span>
+                                            ))
                                         )}
-                                        {token.sources && token.sources.map((source) => (
-                                            <span key={source} className="source-badge">
-                                                {source.toUpperCase()}
-                                            </span>
-                                        ))}
                                     </div>
                                 </td>
                             </tr>
