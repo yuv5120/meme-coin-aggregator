@@ -70,7 +70,6 @@ export const TokenTable: React.FC<TokenTableProps> = ({ tokens, loading, period 
                 </thead>
                 <tbody>
                     {tokens.map((token, index) => {
-                        const isPositiveChange = token.price_1hr_change >= 0;
                         const isAggregated = token.sources && token.sources.length > 1;
 
                         return (
