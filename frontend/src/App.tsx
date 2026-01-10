@@ -4,7 +4,7 @@ import { TokenTable } from './components/TokenTable';
 import { useWebSocket } from './hooks/useWebSocket';
 import './styles/index.css';
 
-const WS_URL = 'http://localhost:3000';
+const WS_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 function App() {
     const { isConnected, tokens: wsTokens, lastUpdate } = useWebSocket(WS_URL);
