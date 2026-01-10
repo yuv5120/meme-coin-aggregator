@@ -41,7 +41,7 @@ cron.schedule('*/30 * * * * *', async () => {
     try {
         console.log('🔄 Running scheduled update...');
 
-        const tokens = await aggregator.getTokens({ limit: 30 });
+        const tokens = await aggregator.getTokens({ limit: 30, skipCache: true });
         const { priceChanges, volumeSpikes } = aggregator.detectChanges(tokens);
 
         // Send updates via WebSocket

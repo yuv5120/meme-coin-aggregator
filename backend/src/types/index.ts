@@ -29,6 +29,7 @@ export interface FilterOptions {
     sortBy?: 'volume' | 'price_change' | 'market_cap';
     limit?: number;
     cursor?: string;
+    skipCache?: boolean;
 }
 
 export interface WebSocketUpdate {

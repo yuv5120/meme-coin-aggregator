@@ -22,11 +22,13 @@ export class Aggregator {
     async getTokens(options: FilterOptions = {}): Promise<Token[]> {
         const cacheKey = this.getCacheKey(options);
 
-        // Try cache first
-        const cached = await this.cache.get(cacheKey);
-        if (cached) {
-            console.log('✅ Cache hit for:', cacheKey);
-            return this.applyFiltersAndSort(cached, options);
+        // Try cache first (unless skipping)
+        if (!options.skipCache) {
+            const cached = await this.cache.get(cacheKey);
+            if (cached) {
+                console.log('✅ Cache hit for:', cacheKey);
+                return this.applyFiltersAndSort(cached, options);
+            }
         }
 
         console.log('⚠️ Cache miss, fetching from APIs...');
