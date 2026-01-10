@@ -1,0 +1,611 @@
+{
+    "info": {
+        "name": "Meme Coin Aggregator API",
+        "description": "Comprehensive API test collection for the Meme Coin Aggregation Service with 10+ tests covering happy-path and edge-cases",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Health Check",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status code is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Response has status field', function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('status');",
+                            "    pm.expect(jsonData.status).to.eql('ok');",
+                            "});",
+                            "",
+                            "pm.test('Response has timestamp', function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('timestamp');",
+                            "    pm.expect(jsonData.timestamp).to.be.a('number');",
+                            "});",
+                            "",
+                            "pm.test('Response time is less than 200ms', function () {",
+                            "    pm.expect(pm.response.responseTime).to.be.below(200);",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/api/health",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "health"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Get All Tokens (Default)",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status code is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Response has tokens array', function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('tokens');",
+                            "    pm.expect(jsonData.tokens).to.be.an('array');",
+                            "});",
+                            "",
+                            "pm.test('Response has pagination', function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('pagination');",
+                            "    pm.expect(jsonData.pagination).to.have.property('total');",
+                            "    pm.expect(jsonData.pagination).to.have.property('limit');",
+                            "});",
+                            "",
+                            "pm.test('Tokens have required fields', function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    if (jsonData.tokens.length > 0) {",
+                            "        var token = jsonData.tokens[0];",
+                            "        pm.expect(token).to.have.property('token_address');",
+                            "        pm.expect(token).to.have.property('token_name');",
+                            "        pm.expect(token).to.have.property('token_ticker');",
+                            "        pm.expect(token).to.have.property('price_sol');",
+                            "        pm.expect(token).to.have.property('volume_sol');",
+                            "        pm.expect(token).to.have.property('sources');",
+                            "    }",
+                            "});",
+                            "",
+                            "pm.test('Response time is acceptable', function () {",
+                            "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/api/tokens",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "tokens"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Get Tokens with Pagination (Limit 10)",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status code is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Returns at most 10 tokens', function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData.tokens.length).to.be.at.most(10);",
+                            "});",
+                            "",
+                            "pm.test('Pagination limit is 10', function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData.pagination.limit).to.eql(10);",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/api/tokens?limit=10",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "tokens"
+                    ],
+                    "query": [
+                        {
+                            "key": "limit",
+                            "value": "10"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Filter by Time Period (1h)",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status code is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Returns tokens array', function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData.tokens).to.be.an('array');",
+                            "});",
+                            "",
+                            "pm.test('Tokens have price_1hr_change field', function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    if (jsonData.tokens.length > 0) {",
+                            "        pm.expect(jsonData.tokens[0]).to.have.property('price_1hr_change');",
+                            "    }",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/api/tokens?period=1h",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "tokens"
+                    ],
+                    "query": [
+                        {
+                            "key": "period",
+                            "value": "1h"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Filter by Time Period (24h)",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status code is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Returns tokens array', function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData.tokens).to.be.an('array');",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/api/tokens?period=24h",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "tokens"
+                    ],
+                    "query": [
+                        {
+                            "key": "period",
+                            "value": "24h"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Sort by Volume",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status code is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Tokens are sorted by volume (descending)', function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    if (jsonData.tokens.length > 1) {",
+                            "        for (let i = 0; i < jsonData.tokens.length - 1; i++) {",
+                            "            pm.expect(jsonData.tokens[i].volume_sol).to.be.at.least(jsonData.tokens[i + 1].volume_sol);",
+                            "        }",
+                            "    }",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/api/tokens?sortBy=volume",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "tokens"
+                    ],
+                    "query": [
+                        {
+                            "key": "sortBy",
+                            "value": "volume"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Sort by Price Change",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status code is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Tokens are sorted by price change (descending)', function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    if (jsonData.tokens.length > 1) {",
+                            "        for (let i = 0; i < jsonData.tokens.length - 1; i++) {",
+                            "            pm.expect(jsonData.tokens[i].price_1hr_change).to.be.at.least(jsonData.tokens[i + 1].price_1hr_change);",
+                            "        }",
+                            "    }",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/api/tokens?sortBy=price_change",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "tokens"
+                    ],
+                    "query": [
+                        {
+                            "key": "sortBy",
+                            "value": "price_change"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Sort by Market Cap",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status code is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Tokens are sorted by market cap (descending)', function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    if (jsonData.tokens.length > 1) {",
+                            "        for (let i = 0; i < jsonData.tokens.length - 1; i++) {",
+                            "            pm.expect(jsonData.tokens[i].market_cap_sol).to.be.at.least(jsonData.tokens[i + 1].market_cap_sol);",
+                            "        }",
+                            "    }",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/api/tokens?sortBy=market_cap",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "tokens"
+                    ],
+                    "query": [
+                        {
+                            "key": "sortBy",
+                            "value": "market_cap"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Combined Filters (Period + Sort + Limit)",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status code is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Returns at most 5 tokens', function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData.tokens.length).to.be.at.most(5);",
+                            "});",
+                            "",
+                            "pm.test('Tokens are sorted by volume', function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    if (jsonData.tokens.length > 1) {",
+                            "        for (let i = 0; i < jsonData.tokens.length - 1; i++) {",
+                            "            pm.expect(jsonData.tokens[i].volume_sol).to.be.at.least(jsonData.tokens[i + 1].volume_sol);",
+                            "        }",
+                            "    }",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/api/tokens?period=24h&sortBy=volume&limit=5",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "tokens"
+                    ],
+                    "query": [
+                        {
+                            "key": "period",
+                            "value": "24h"
+                        },
+                        {
+                            "key": "sortBy",
+                            "value": "volume"
+                        },
+                        {
+                            "key": "limit",
+                            "value": "5"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Invalid Period Parameter (Edge Case)",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status code is 200 (gracefully handles invalid period)', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Still returns tokens array', function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData.tokens).to.be.an('array');",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/api/tokens?period=invalid",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "tokens"
+                    ],
+                    "query": [
+                        {
+                            "key": "period",
+                            "value": "invalid"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Invalid Sort Parameter (Edge Case)",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status code is 200 (gracefully handles invalid sort)', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Still returns tokens array', function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData.tokens).to.be.an('array');",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/api/tokens?sortBy=invalid",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "tokens"
+                    ],
+                    "query": [
+                        {
+                            "key": "sortBy",
+                            "value": "invalid"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Large Limit Parameter (Edge Case)",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status code is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Returns tokens within reasonable limit', function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData.tokens.length).to.be.at.most(100);",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/api/tokens?limit=1000",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "tokens"
+                    ],
+                    "query": [
+                        {
+                            "key": "limit",
+                            "value": "1000"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Response Time Test (Performance)",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Response time is under 1 second', function () {",
+                            "    pm.expect(pm.response.responseTime).to.be.below(1000);",
+                            "});",
+                            "",
+                            "pm.test('Status code is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Response is JSON', function () {",
+                            "    pm.response.to.be.json;",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/api/tokens",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "tokens"
+                    ]
+                }
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:3000",
+            "type": "string"
+        }
+    ]
+}
