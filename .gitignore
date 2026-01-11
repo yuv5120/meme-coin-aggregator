@@ -43,3 +43,4 @@ Thumbs.db
 # Documentation
 *.md
 !README.md
+!DESIGN_DECISIONS.md
