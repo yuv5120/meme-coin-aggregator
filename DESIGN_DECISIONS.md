@@ -6,6 +6,7 @@ This document provides detailed explanations of the key architectural and design
 
 ## Table of Contents
 
+0. [Architecture Overview](#0-architecture-overview)
 1. [Multi-Source Aggregation Strategy](#1-multi-source-aggregation-strategy)
 2. [Caching Strategy with Redis](#2-caching-strategy-with-redis)
 3. [WebSocket vs HTTP Polling](#3-websocket-vs-http-polling)
@@ -16,6 +17,103 @@ This document provides detailed explanations of the key architectural and design
 8. [UI/UX Design Choices](#8-uiux-design-choices)
 9. [CoinGecko Integration for 7-Day Data](#9-coingecko-integration-for-7-day-data)
 10. [Configuration Management](#10-configuration-management)
+
+---
+
+## 0. Architecture Overview
+
+### System Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         Frontend Layer                       │
+│  ┌─────────────┐         ┌──────────────┐                  │
+│  │  React App  │◄────────┤ WebSocket    │                  │
+│  │  (Vite)     │         │ Client       │                  │
+│  └─────────────┘         └──────────────┘                  │
+│         │                        │                           │
+└─────────┼────────────────────────┼───────────────────────────┘
+          │ HTTP REST              │ WS (Socket.io)
+          ▼                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│                        Backend Layer                         │
+│  ┌──────────────┐      ┌─────────────┐                     │
+│  │ Express API  │◄─────┤ Socket.io   │                     │
+│  │ Routes       │      │ Server      │                     │
+│  └──────┬───────┘      └─────────────┘                     │
+│         │                                                    │
+│         ▼                                                    │
+│  ┌──────────────────────────────────┐                      │
+│  │      Aggregator Service          │                      │
+│  │  (Business Logic & Merging)      │                      │
+│  └──────┬───────────────────────────┘                      │
+│         │                                                    │
+│         ├──────┬──────────┬──────────┐                     │
+│         ▼      ▼          ▼          ▼                     │
+│  ┌──────────┐ ┌────────┐ ┌────────┐ ┌────────┐           │
+│  │  Cache   │ │  Dex   │ │Jupiter │ │CoinGecko│           │
+│  │ Service  │ │Screener│ │Provider│ │Provider │           │
+│  │ (Redis)  │ │Provider│ │        │ │         │           │
+│  └──────────┘ └────────┘ └────────┘ └────────┘           │
+└─────────────────────────────────────────────────────────────┘
+          │           │          │          │
+          ▼           ▼          ▼          ▼
+     ┌────────┐  ┌────────┐ ┌────────┐ ┌────────┐
+     │ Redis  │  │  Dex   │ │Jupiter │ │CoinGecko│
+     │  DB    │  │Screener│ │  API   │ │  API    │
+     └────────┘  │  API   │ └────────┘ └────────┘
+                 └────────┘
+```
+
+### Data Flow Diagram
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Backend
+    participant Cache
+    participant DexScreener
+    participant Jupiter
+    participant CoinGecko
+
+    Client->>Backend: WebSocket Connect
+    Backend->>Cache: Check Cache
+    
+    alt Cache Hit
+        Cache-->>Backend: Return Cached Data
+        Backend-->>Client: Send Initial Data
+    else Cache Miss
+        Backend->>DexScreener: Fetch Tokens (Parallel)
+        Backend->>Jupiter: Fetch Tokens (Parallel)
+        DexScreener-->>Backend: Token Data
+        Jupiter-->>Backend: Token Data
+        Backend->>Backend: Merge Tokens
+        Backend->>CoinGecko: Enrich 7d Data
+        CoinGecko-->>Backend: 7d Price Data
+        Backend->>Cache: Store Merged Data (30s TTL)
+        Backend-->>Client: Send Initial Data
+    end
+
+    loop Every 30 seconds
+        Backend->>Cache: Fetch Latest
+        Backend->>Backend: Detect Changes
+        Backend-->>Client: Push Updates (if changed)
+    end
+```
+
+### Component Responsibilities
+
+| Component | Responsibility | Technology |
+|-----------|---------------|------------|
+| **Frontend** | User interface, client-side filtering | React, TypeScript, Vite |
+| **WebSocket Client** | Real-time data subscription | Socket.io Client |
+| **Express API** | REST endpoints, request handling | Express.js |
+| **Socket.io Server** | WebSocket connections, broadcasting | Socket.io |
+| **Aggregator** | Token merging, change detection | TypeScript |
+| **Cache Service** | Data caching, TTL management | Redis, ioredis |
+| **DexScreener Provider** | Fetch DEX data | Axios |
+| **Jupiter Provider** | Fetch Jupiter data | Axios |
+| **CoinGecko Provider** | Fetch 7-day price data | Axios |
 
 ---
 
